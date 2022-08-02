@@ -26,14 +26,14 @@ class HttpService {
     } else {
       // If the server did not return a 200 OK response,
       // then throw an exception.
-      throw Exception('Failed to load album');
+      throw Exception('Failed to load Player Data');
     }
   }
 
   Future Authenticate() async {
     const loginEndpoint = "$baseURL/Login";
     final Response reponse;
-    var response = http.post(
+    var response = await http.post(
       Uri.parse("$loginEndpoint"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -43,13 +43,14 @@ class HttpService {
         'password': "Test12345!"
       }),
     );
-
-    final responseBody = await response;
-    Map<String, dynamic> data = jsonDecode(responseBody.body);
-    final Map parsed = json.decode(responseBody.body);
-    final auth = AuthenticationResponse.fromJson(parsed);
-    await SecureStorageUtil.putString("jwtToken", auth.JwtToken);
-    var test = await SecureStorageUtil.getString("jwtToken");
-    print(test);
+    if (response.statusCode == 200) {
+      final responseBody = response;
+      Map<String, dynamic> data = jsonDecode(responseBody.body);
+      final Map parsed = json.decode(responseBody.body);
+      final auth = AuthenticationResponse.fromJson(parsed);
+      await SecureStorageUtil.putString("jwtToken", auth.JwtToken);
+      var test = await SecureStorageUtil.getString("jwtToken");
+      print(test);
+    }
   }
 }
